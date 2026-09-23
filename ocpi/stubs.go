@@ -3,49 +3,13 @@ package ocpi
 import "context"
 
 // This file contains typed request/response shapes for the OCPI 2.3.0
-// modules on the Hub's public roadmap (see components/ModuleAccordion.tsx
-// and docs/Roaming_hub_Latam.md in the Hub repository). None of these
-// modules are implemented server-side yet — every method below returns
-// ErrNotImplemented — but the types are already modeled so that consumers
-// can code against the final shapes ahead of time.
-
-// -----------------------------------------------------------------------
-// Locations
-// -----------------------------------------------------------------------
-
-// Coordinates is a WGS84 latitude/longitude pair, as used in Location.
-type Coordinates struct {
-	Latitude  string `json:"latitude"`
-	Longitude string `json:"longitude"`
-}
-
-// EVSE describes one charge point within a Location.
-type EVSE struct {
-	UID    string `json:"uid"`
-	Status string `json:"status"`
-}
-
-// Location describes a charging site (mod_locations).
-type Location struct {
-	CountryCode string `json:"country_code"`
-	PartyID     string `json:"party_id"`
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	City        string `json:"city"`
-	EVSEs       []EVSE `json:"evses"`
-}
-
-// GetLocations would list all Locations visible to the caller.
-// Not implemented by the Hub yet.
-func (c *Client) GetLocations(ctx context.Context) ([]Location, error) {
-	return nil, notImplementedError("Locations")
-}
-
-// GetLocation would fetch a single Location by ID.
-// Not implemented by the Hub yet.
-func (c *Client) GetLocation(ctx context.Context, locationID string) (*Location, error) {
-	return nil, notImplementedError("Locations")
-}
+// modules still on the Hub's public roadmap (see
+// components/ModuleAccordion.tsx and docs/Roaming_hub_Latam.md in the Hub
+// repository). Locations, Tariffs and Hub Client Info are implemented
+// server-side — see locations.go, tariffs.go and hub_client_info.go —
+// every other method below still returns ErrNotImplemented, but the types
+// are already modeled so that consumers can code against the final shapes
+// ahead of time.
 
 // -----------------------------------------------------------------------
 // Sessions
@@ -81,41 +45,19 @@ type CdrToken struct {
 
 // CdrLocation is a snapshot of the Location a CDR was generated at.
 type CdrLocation struct {
-	ID                   string      `json:"id"`
-	Name                 string      `json:"name"`
-	Address              string      `json:"address"`
-	City                 string      `json:"city"`
-	PostalCode           string      `json:"postal_code"`
-	Country              string      `json:"country"`
-	Coordinates          Coordinates `json:"coordinates"`
-	EVSEID               string      `json:"evse_id"`
-	EVSEUID              string      `json:"evse_uid"`
-	ConnectorID          string      `json:"connector_id"`
-	ConnectorStandard    string      `json:"connector_standard"`
-	ConnectorFormat      string      `json:"connector_format"`
-	ConnectorPowerType   string      `json:"connector_power_type"`
-}
-
-// PriceComponent is one line item of a TariffElement.
-type PriceComponent struct {
-	Type     string  `json:"type"`
-	Price    float64 `json:"price"`
-	Vat      float64 `json:"vat"`
-	StepSize int     `json:"step_size"`
-}
-
-// TariffElement groups PriceComponents under (optional) restrictions.
-type TariffElement struct {
-	PriceComponents []PriceComponent `json:"price_components"`
-}
-
-// Tariff describes a pricing structure (mod_tariffs).
-type Tariff struct {
-	CountryCode string          `json:"country_code"`
-	PartyID     string          `json:"party_id"`
-	ID          string          `json:"id"`
-	Currency    string          `json:"currency"`
-	Elements    []TariffElement `json:"elements"`
+	ID                 string      `json:"id"`
+	Name               string      `json:"name"`
+	Address            string      `json:"address"`
+	City               string      `json:"city"`
+	PostalCode         string      `json:"postal_code"`
+	Country            string      `json:"country"`
+	Coordinates        Coordinates `json:"coordinates"`
+	EVSEID             string      `json:"evse_id"`
+	EVSEUID            string      `json:"evse_uid"`
+	ConnectorID        string      `json:"connector_id"`
+	ConnectorStandard  string      `json:"connector_standard"`
+	ConnectorFormat    string      `json:"connector_format"`
+	ConnectorPowerType string      `json:"connector_power_type"`
 }
 
 // ChargingPeriodDimension is one metered dimension (ENERGY, TIME, ...)
@@ -177,16 +119,6 @@ func (c *Client) SubmitCdr(ctx context.Context, cdr Cdr) error {
 }
 
 // -----------------------------------------------------------------------
-// Tariffs
-// -----------------------------------------------------------------------
-
-// GetTariffs would list Tariffs visible to the caller.
-// Not implemented by the Hub yet.
-func (c *Client) GetTariffs(ctx context.Context) ([]Tariff, error) {
-	return nil, notImplementedError("Tariffs")
-}
-
-// -----------------------------------------------------------------------
 // Tokens & Authorisation
 // -----------------------------------------------------------------------
 
@@ -239,33 +171,15 @@ func (c *Client) UnlockConnector(ctx context.Context, locationID, evseUID string
 }
 
 // -----------------------------------------------------------------------
-// Hub Client Info
-// -----------------------------------------------------------------------
-
-// HubClientInfo describes the connection status of a party known to the
-// Hub (mod_hubclientinfo).
-type HubClientInfo struct {
-	PartyID     string `json:"party_id"`
-	CountryCode string `json:"country_code"`
-	Status      string `json:"status"`
-}
-
-// GetHubClientInfo would list the connection status of every party known
-// to the Hub. Not implemented by the Hub yet.
-func (c *Client) GetHubClientInfo(ctx context.Context) ([]HubClientInfo, error) {
-	return nil, notImplementedError("Hub Client Info")
-}
-
-// -----------------------------------------------------------------------
 // Invoice Reconciliation (OCPI 2.3.0 Edition 2)
 // -----------------------------------------------------------------------
 
 // InvoiceReconciliation matches a CDR against an invoice reference for
 // financial reconciliation (mod_invoicereconciliations).
 type InvoiceReconciliation struct {
-	CdrID             string `json:"cdr_id"`
-	InvoiceReference  string `json:"invoice_reference"`
-	Status            string `json:"status"`
+	CdrID            string `json:"cdr_id"`
+	InvoiceReference string `json:"invoice_reference"`
+	Status           string `json:"status"`
 }
 
 // GetInvoiceReconciliations would list invoice reconciliation records.
@@ -281,9 +195,9 @@ func (c *Client) GetInvoiceReconciliations(ctx context.Context) ([]InvoiceReconc
 // ChargingProfile describes a smart-charging power limit schedule
 // (mod_charging_profiles).
 type ChargingProfile struct {
-	StartDateTime     string  `json:"start_date_time"`
-	ChargingRateUnit  string  `json:"charging_rate_unit"`
-	Limit             float64 `json:"limit"`
+	StartDateTime    string  `json:"start_date_time"`
+	ChargingRateUnit string  `json:"charging_rate_unit"`
+	Limit            float64 `json:"limit"`
 }
 
 // SetChargingProfile would push a ChargingProfile for a given session to a

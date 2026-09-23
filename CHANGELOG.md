@@ -4,6 +4,49 @@ Todas las versiones notables de `github.com/latam-evra/ocpi-go` se documentan
 en este archivo. El formato sigue aproximadamente
 [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [0.3.0] - 2026-09-23
+
+### Agregado
+
+- Implementación real del módulo **Hub Client Info**
+  (`ocpi/hub_client_info.go`): `ListHubClientInfo`, `GetHubClientInfo`,
+  con tipo `HubClientInfoEntry` que mapea `toEntry()`/`STATUS_MAP` en
+  `lib/ocpi/hubClientInfo.ts` del Hub (`PLANNED`/`CONNECTED`/
+  `SUSPENDED`/`STOPPED`).
+- Suite de tests de integración
+  (`ocpi/hub_client_info_integration_test.go`, build tag `integration`)
+  para el módulo, reutilizando los helpers de `integration_test.go`.
+- `ocpi/stubs.go`: se retiró el stub `GetHubClientInfo` y el tipo
+  `HubClientInfo` (simplificado, sin `role`/`last_updated`) — reemplazado
+  por la implementación real.
+
+## [0.2.0] - 2026-09-23
+
+### Agregado
+
+- Implementación real del módulo **Locations** (`ocpi/locations.go`):
+  `GetLocations`, `GetLocation`, `PutLocation`, `PatchLocation`, con tipos
+  `Location`, `LocationInput`, `EVSE`, `EvseInput`, `Connector`,
+  `ConnectorInput` que mapean el JSON público emitido por
+  `toPublicLocation()` en `lib/ocpi/locations.ts` del Hub.
+- Implementación real del módulo **Tariffs** (`ocpi/tariffs.go`):
+  `GetTariffs`, `GetTariff`, `PutTariff`, `DeleteTariff`, con tipos
+  `Tariff`, `TariffInput`, `TariffElement`, `PriceComponent` que mapean
+  `toPublicTariff()` en `lib/ocpi/tariffs.ts` del Hub.
+- Suite de tests de integración (`ocpi/integration_test.go`, build tag
+  `integration`) que ejercita Credentials + Locations + Tariffs contra un
+  Hub real corriendo localmente, sin mocks — mismo patrón que
+  `sdks/node/tests/integration/` y `sdks/python/tests/integration/`.
+- `Coordinates`, `Tariff`, `PriceComponent` y `TariffElement` se movieron
+  desde `ocpi/stubs.go` a los nuevos `ocpi/locations.go`/`ocpi/tariffs.go`
+  (mismo paquete, sin cambio de import para consumidores).
+
+### Cambiado
+
+- `Location` y `Tariff` ahora reflejan la forma real de la respuesta del
+  Hub (antes eran una versión simplificada, escrita antes de que el Hub
+  implementara estos módulos server-side).
+
 ## [0.1.0] - 2026-09-22
 
 ### Agregado

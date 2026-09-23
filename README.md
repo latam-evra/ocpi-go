@@ -4,12 +4,12 @@ Cliente Go ligero para el Hub de roaming OCPI 2.3.0 de **LATAM EV Roaming
 Alliance**. Usa exclusivamente la librería estándar de Go (`net/http`,
 `encoding/json`) — sin dependencias externas.
 
-> **Estado actual del Hub**: hoy el Hub solo implementa realmente el módulo
-> **Credentials & Registration**. Este SDK expone un cliente completo y
-> funcional para ese módulo, y stubs tipados para el resto de los módulos
-> del roadmap OCPI (Locations, Sessions, CDRs, Tariffs, Tokens, Commands,
-> Hub Client Info, Invoice Reconciliation, Charging Profiles), que hoy
-> devuelven `ErrNotImplemented`.
+> **Estado actual del Hub**: el Hub implementa realmente **Credentials &
+> Registration**, **Locations**, **Tariffs** y **Hub Client Info**. Este
+> SDK expone un cliente completo y funcional para esos cuatro módulos, y
+> stubs tipados para el resto del roadmap OCPI (Sessions, CDRs, Tokens,
+> Commands, Invoice Reconciliation, Charging Profiles), que hoy devuelven
+> `ErrNotImplemented`.
 
 ## Instalación
 
@@ -26,7 +26,7 @@ localmente desde otro proyecto Go, cloná o copiá el directorio `sdks/go/` y
 agregá una directiva `replace` en el `go.mod` del consumidor:
 
 ```
-require github.com/latam-evra/ocpi-go v0.1.0
+require github.com/latam-evra/ocpi-go v0.2.0
 
 replace github.com/latam-evra/ocpi-go => ../ruta/a/latam-evra.org/sdks/go
 ```
@@ -99,6 +99,43 @@ func main() {
 }
 ```
 
+## Uso: Locations y Tariffs
+
+```go
+// Publicar una Location (requiere rol CPO en country_code/party_id).
+loc, err := client.PutLocation(ctx, tokenB, "CL", "CHG", "LOC-1", ocpi.LocationInput{
+	ID:      "LOC-1",
+	Publish: true,
+	Address: "Av. Andrés Bello 2425",
+	City:    "Santiago",
+	Country: "CHL",
+	Coordinates: ocpi.Coordinates{Latitude: "-33.4182", Longitude: "-70.6061"},
+})
+
+// Actualización parcial.
+patched, err := client.PatchLocation(ctx, tokenB, "CL", "CHG", "LOC-1", map[string]any{
+	"city": "Valparaíso",
+})
+
+// Listar Locations publicadas, y obtener una por id.
+page, err := client.GetLocations(ctx, tokenB, 0, 50)
+one, err := client.GetLocation(ctx, tokenB, "CL", "CHG", "LOC-1")
+
+// Tariffs: put, get, delete.
+tariff, err := client.PutTariff(ctx, tokenB, "CL", "CHG", "TAR-1", ocpi.TariffInput{
+	ID:       "TAR-1",
+	Currency: "USD",
+	Elements: []ocpi.TariffElement{
+		{PriceComponents: []ocpi.PriceComponent{{Type: "ENERGY", Price: 0.35, StepSize: 1}}},
+	},
+})
+err = client.DeleteTariff(ctx, tokenB, "CL", "CHG", "TAR-1")
+
+// Hub Client Info: visibilidad de qué parties están conectadas al Hub.
+list, err := client.ListHubClientInfo(ctx, tokenB, 0, 50)
+byRole, err := client.GetHubClientInfo(ctx, tokenB, "CL", "CHG")
+```
+
 ### Manejo de errores OCPI
 
 El Hub responde con `HTTP 200` (o el código HTTP que corresponda) y un
@@ -124,13 +161,13 @@ if ocpi.AsOcpiError(err, &ocpiErr) {
 | Módulo | Estado | Métodos del SDK |
 |---|---|---|
 | Credentials & Registration | **Disponible** (implementado en el Hub) | `GetVersions`, `GetDetails`, `RegisterCredentials`, `RenewCredentials`, `TerminateCredentials` |
-| Locations | Roadmap | `GetLocations`, `GetLocation` (devuelven `ErrNotImplemented`) |
+| Locations | **Disponible** (implementado en el Hub) | `GetLocations`, `GetLocation`, `PutLocation`, `PatchLocation` |
+| Tariffs | **Disponible** (implementado en el Hub) | `GetTariffs`, `GetTariff`, `PutTariff`, `DeleteTariff` |
+| Hub Client Info | **Disponible** (implementado en el Hub) | `ListHubClientInfo`, `GetHubClientInfo` |
 | Sessions | Roadmap | `GetActiveSession` |
 | CDRs | Roadmap | `GetCdrs`, `SubmitCdr` |
-| Tariffs | Roadmap | `GetTariffs` |
 | Tokens & Authorisation | Roadmap | `AuthorizeToken` |
 | Commands | Roadmap | `StartSession`, `StopSession`, `UnlockConnector` |
-| Hub Client Info | Roadmap | `GetHubClientInfo` |
 | Invoice Reconciliation (Ed. 2) | Roadmap | `GetInvoiceReconciliations` |
 | Charging Profiles | Roadmap | `SetChargingProfile` |
 
@@ -147,6 +184,33 @@ cd sdks/go
 go build ./...
 go test ./...
 ```
+
+## Tests de integración
+
+Requieren el Hub real corriendo. Están separados de la suite normal con el
+build tag `integration` porque hacen llamadas HTTP reales y disparan un
+subproceso (`npx tsx scripts/create-test-registration.ts`) contra la base de
+datos del Hub — nunca corren en `go test ./...` sin el tag.
+
+El handshake de Credentials simula un CSMS corriendo en `localhost`, lo cual
+la protección SSRF del Hub bloquea por diseño. Por eso el Hub usado para
+estos tests necesita levantarse con `OCPI_ALLOW_LOOPBACK=true`, una env var
+de solo desarrollo que **nunca debe activarse en producción**. No reutilices
+el server de producción de pm2 — levantá una instancia dev dedicada desde la
+raíz del repo:
+
+```bash
+OCPI_ALLOW_LOOPBACK=true PORT=3948 npm run dev
+```
+
+Y corré la suite apuntando a esa instancia:
+
+```bash
+OCPI_HUB_TEST_URL=http://localhost:3948 go test -tags=integration ./...
+```
+
+Por defecto (sin `OCPI_HUB_TEST_URL`) apuntan a `http://localhost:3947` —
+solo válido si esa instancia también tiene `OCPI_ALLOW_LOOPBACK=true`.
 
 ## Licencia
 
