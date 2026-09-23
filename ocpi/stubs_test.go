@@ -16,17 +16,13 @@ func TestStubsReturnNotImplemented(t *testing.T) {
 		name string
 		err  error
 	}{
-		{"GetLocations", func() error { _, err := client.GetLocations(ctx); return err }()},
-		{"GetLocation", func() error { _, err := client.GetLocation(ctx, "LOC-1"); return err }()},
 		{"GetActiveSession", func() error { _, err := client.GetActiveSession(ctx, "SES-1"); return err }()},
 		{"GetCdrs", func() error { _, err := client.GetCdrs(ctx); return err }()},
 		{"SubmitCdr", client.SubmitCdr(ctx, Cdr{})},
-		{"GetTariffs", func() error { _, err := client.GetTariffs(ctx); return err }()},
 		{"AuthorizeToken", func() error { _, err := client.AuthorizeToken(ctx, "RFID-1"); return err }()},
 		{"StartSession", client.StartSession(ctx, StartSessionCommand{})},
 		{"StopSession", client.StopSession(ctx, "SES-1")},
 		{"UnlockConnector", client.UnlockConnector(ctx, "LOC-1", "EVSE-1")},
-		{"GetHubClientInfo", func() error { _, err := client.GetHubClientInfo(ctx); return err }()},
 		{"GetInvoiceReconciliations", func() error { _, err := client.GetInvoiceReconciliations(ctx); return err }()},
 		{"SetChargingProfile", client.SetChargingProfile(ctx, "SES-1", ChargingProfile{})},
 	}

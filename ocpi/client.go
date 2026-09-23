@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -114,6 +115,12 @@ func doRequest[T any](ctx context.Context, c *Client, method, url, token string,
 	}
 
 	return &env, nil
+}
+
+// paginationQuery builds a "?offset=N&limit=N" query string, shared by every
+// list endpoint (GetLocations, GetTariffs, ...).
+func paginationQuery(offset, limit int) string {
+	return "?offset=" + strconv.Itoa(offset) + "&limit=" + strconv.Itoa(limit)
 }
 
 // GetVersions calls GET /versions and returns the list of OCPI versions the
