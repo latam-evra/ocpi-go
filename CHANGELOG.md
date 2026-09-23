@@ -4,6 +4,56 @@ Todas las versiones notables de `github.com/latam-evra/ocpi-go` se documentan
 en este archivo. El formato sigue aproximadamente
 [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [0.4.0] - 2026-09-23
+
+### Agregado
+
+- Implementación real de 5 módulos: **Sessions** (`ocpi/sessions.go`:
+  `GetSessions`, `GetSession`, `PutSession`, `PatchSession`), **CDRs**
+  (`ocpi/cdrs.go`: `GetCdrs`, `GetCdr`, `PostCdr` — sin Put/Patch/Delete,
+  CDRs son inmutables), **Tokens & Authorisation** (`ocpi/tokens.go`:
+  `GetTokens`, `GetToken`, `PutToken`, `PatchToken`, `DeleteToken`, más
+  `AuthorizeToken` como método propio, no CRUD, que hace POST a
+  `/tokens/{country_code}/{party_id}/{token_uid}/authorize` con body JSON
+  — nunca surge un error de negocio, cualquier fallo interno resuelve a
+  `AuthorizeResult{Allowed: "BLOCKED"}`), **Commands**
+  (`ocpi/commands.go`: `StartSession`, `ReserveNow`, `StopSession`,
+  `UnlockConnector`, `CancelReservation` — cada uno un `POST
+  /commands/{TYPE}` con su struct de payload tipado, más `GetCommand`
+  cuyo `GET` vive en `/commands/callback/{command_id}`, no en
+  `/commands/{command_type}`) e **Invoice Reconciliation**
+  (`ocpi/invoice_reconciliation.go`: `GetInvoiceReconciliations`,
+  `GetInvoiceReconciliation`, `PutInvoiceReconciliation` — upsert, sin
+  POST — y `DeleteInvoiceReconciliation`; `InvoiceReconciliation` incluye
+  los campos opcionales de conversión FX server-side,
+  `DiscrepancyCurrency`/`DiscrepancyAmountUSD`/`ExchangeRateUsed`,
+  ausentes cuando el `PUT` no incluyó `discrepancy_amount`).
+- `CdrToken`, `ChargingPeriodDimension` y `ChargingPeriod` se definen en
+  `ocpi/sessions.go` y se reusan desde `ocpi/cdrs.go`; `PriceComponent` y
+  `TariffElement` (ya existentes en `ocpi/tariffs.go`) se reusan desde
+  `CdrTariff` en `ocpi/cdrs.go` — `TariffElement` ahora también expone
+  `Restrictions`, usado por CDRs.
+- Tests unitarios por módulo (`ocpi/sessions_test.go`,
+  `ocpi/cdrs_test.go`, `ocpi/tokens_test.go`, `ocpi/commands_test.go`,
+  `ocpi/invoice_reconciliation_test.go`), mismo patrón que
+  `ocpi/locations_test.go` (`httptest.NewServer` mockeando el Hub).
+- Tests de integración por módulo (build tag `integration`:
+  `ocpi/sessions_integration_test.go`, `ocpi/cdrs_integration_test.go`,
+  `ocpi/tokens_integration_test.go`, `ocpi/commands_integration_test.go`
+  — con un `httptest.NewServer` actuando de CPO externo, mismo patrón que
+  el equivalente Node/Python —,
+  `ocpi/invoice_reconciliation_integration_test.go` — incluye un caso de
+  conversión FX real vía Frankfurter/BCCh sobre un CDR en CLP).
+- `ocpi/stubs.go`: se retiraron los stubs `GetActiveSession`, `GetCdrs`,
+  `SubmitCdr`, `AuthorizeToken`, `StartSession`, `StopSession`,
+  `UnlockConnector`, `GetInvoiceReconciliations` y los structs
+  placeholder correspondientes (`Session`, `Cdr`, `CdrToken`,
+  `CdrLocation`, `ChargingPeriodDimension`, `ChargingPeriod`, `Price`,
+  `Token`, `CommandTokenRef`, `StartSessionCommand`,
+  `InvoiceReconciliation`) — reemplazados por las implementaciones
+  reales. `SetChargingProfile`/`ChargingProfile` son el único stub que
+  queda (Charging Profiles no está en el roadmap del Hub).
+
 ## [0.3.0] - 2026-09-23
 
 ### Agregado
