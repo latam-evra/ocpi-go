@@ -11,19 +11,16 @@ Alliance**. Usa exclusivamente la librería estándar de Go (`net/http`,
 ## Instalación
 
 ```bash
-go get github.com/latam-evra/ocpi-go
+go get github.com/latam-evra/ocpi-go@v0.5.0
 ```
 
-### Nota: módulo aún no publicado/taggeado
-
-Este módulo todavía no fue publicado con un tag en el repositorio público de
-GitHub (`github.com/latam-evra/ocpi-go`), por lo que `go get` puede fallar
-hasta que exista al menos un tag `v0.1.0`. Mientras tanto, para usarlo
-localmente desde otro proyecto Go, cloná o copiá el directorio `sdks/go/` y
+Publicado con tags en el repositorio público de GitHub
+(`github.com/latam-evra/ocpi-go`). Para desarrollo local contra una copia
+del SDK sin usar el tag publicado, cloná o copiá el directorio `sdks/go/` y
 agregá una directiva `replace` en el `go.mod` del consumidor:
 
 ```
-require github.com/latam-evra/ocpi-go v0.2.0
+require github.com/latam-evra/ocpi-go v0.5.0
 
 replace github.com/latam-evra/ocpi-go => ../ruta/a/latam-evra.org/sdks/go
 ```
