@@ -124,10 +124,10 @@ func TestRegisterCredentials_UnknownToken(t *testing.T) {
 	client, closeFn := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(map[string]any{
-			"data":            map[string]any{},
-			"status_code":     StatusUnknownToken,
-			"status_message":  "TOKEN_A inválido.",
-			"timestamp":       "2026-09-22T00:00:00Z",
+			"data":           map[string]any{},
+			"status_code":    StatusUnknownToken,
+			"status_message": "TOKEN_A inválido.",
+			"timestamp":      "2026-09-22T00:00:00Z",
 		})
 	})
 	defer closeFn()
@@ -188,10 +188,10 @@ func TestTerminateCredentials_Success(t *testing.T) {
 			t.Fatalf("unexpected request: %s %s", r.Method, r.URL.Path)
 		}
 		_ = json.NewEncoder(w).Encode(map[string]any{
-			"data":            map[string]any{},
-			"status_code":     StatusSuccess,
-			"status_message":  "Success",
-			"timestamp":       "2026-09-22T00:00:00Z",
+			"data":           map[string]any{},
+			"status_code":    StatusSuccess,
+			"status_message": "Success",
+			"timestamp":      "2026-09-22T00:00:00Z",
 		})
 	})
 	defer closeFn()
@@ -205,10 +205,10 @@ func TestTerminateCredentials_UnknownToken(t *testing.T) {
 	client, closeFn := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		_ = json.NewEncoder(w).Encode(map[string]any{
-			"data":            map[string]any{},
-			"status_code":     StatusUnknownToken,
-			"status_message":  "TOKEN_B inválido.",
-			"timestamp":       "2026-09-22T00:00:00Z",
+			"data":           map[string]any{},
+			"status_code":    StatusUnknownToken,
+			"status_message": "TOKEN_B inválido.",
+			"timestamp":      "2026-09-22T00:00:00Z",
 		})
 	})
 	defer closeFn()

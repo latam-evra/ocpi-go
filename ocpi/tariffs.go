@@ -18,8 +18,12 @@ type PriceComponent struct {
 }
 
 // TariffElement groups PriceComponents under (optional) restrictions.
+// Restrictions is left untyped (matching the Hub's z.record(...) schema) —
+// shared by Tariff (tariffs.go) and CdrTariff (cdrs.go), whose embedded
+// tariff elements have the same shape.
 type TariffElement struct {
 	PriceComponents []PriceComponent `json:"price_components"`
+	Restrictions    map[string]any   `json:"restrictions,omitempty"`
 }
 
 // Tariff describes a pricing structure (mod_tariffs).

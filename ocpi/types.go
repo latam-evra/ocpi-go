@@ -15,13 +15,13 @@ import "time"
 // These follow the OCPI 2.3.0 convention: 1xxx success, 2xxx client errors,
 // 3xxx server errors.
 const (
-	StatusSuccess           = 1000
-	StatusClientError       = 2000
-	StatusInvalidParameters = 2001
-	StatusNotEnoughInfo     = 2002
-	StatusUnknownToken      = 2003
-	StatusServerError       = 3000
-	StatusUnableToUseAPI    = 3001
+	StatusSuccess            = 1000
+	StatusClientError        = 2000
+	StatusInvalidParameters  = 2001
+	StatusNotEnoughInfo      = 2002
+	StatusUnknownToken       = 2003
+	StatusServerError        = 3000
+	StatusUnableToUseAPI     = 3001
 	StatusUnsupportedVersion = 3002
 )
 

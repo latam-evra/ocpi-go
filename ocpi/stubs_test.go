@@ -5,36 +5,18 @@ import (
 	"testing"
 )
 
-// TestStubsReturnNotImplemented verifies that every roadmap module method
-// returns ErrNotImplemented (wrapped with a module-specific message) until
-// the Hub actually implements that module server-side.
+// TestStubsReturnNotImplemented verifies that the one remaining roadmap
+// module (Charging Profiles) still returns ErrNotImplemented, wrapped with
+// a module-specific message.
 func TestStubsReturnNotImplemented(t *testing.T) {
 	client := NewClient()
 	ctx := context.Background()
 
-	checks := []struct {
-		name string
-		err  error
-	}{
-		{"GetActiveSession", func() error { _, err := client.GetActiveSession(ctx, "SES-1"); return err }()},
-		{"GetCdrs", func() error { _, err := client.GetCdrs(ctx); return err }()},
-		{"SubmitCdr", client.SubmitCdr(ctx, Cdr{})},
-		{"AuthorizeToken", func() error { _, err := client.AuthorizeToken(ctx, "RFID-1"); return err }()},
-		{"StartSession", client.StartSession(ctx, StartSessionCommand{})},
-		{"StopSession", client.StopSession(ctx, "SES-1")},
-		{"UnlockConnector", client.UnlockConnector(ctx, "LOC-1", "EVSE-1")},
-		{"GetInvoiceReconciliations", func() error { _, err := client.GetInvoiceReconciliations(ctx); return err }()},
-		{"SetChargingProfile", client.SetChargingProfile(ctx, "SES-1", ChargingProfile{})},
+	err := client.SetChargingProfile(ctx, "SES-1", ChargingProfile{})
+	if err == nil {
+		t.Fatal("SetChargingProfile: expected an error, got nil")
 	}
-
-	for _, tc := range checks {
-		t.Run(tc.name, func(t *testing.T) {
-			if tc.err == nil {
-				t.Fatalf("%s: expected an error, got nil", tc.name)
-			}
-			if !IsNotImplemented(tc.err) {
-				t.Fatalf("%s: expected ErrNotImplemented, got %v", tc.name, tc.err)
-			}
-		})
+	if !IsNotImplemented(err) {
+		t.Fatalf("SetChargingProfile: expected ErrNotImplemented, got %v", err)
 	}
 }
