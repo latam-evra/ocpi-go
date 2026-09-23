@@ -4,12 +4,9 @@ Cliente Go ligero para el Hub de roaming OCPI 2.3.0 de **LATAM EV Roaming
 Alliance**. Usa exclusivamente la librería estándar de Go (`net/http`,
 `encoding/json`) — sin dependencias externas.
 
-> **Estado actual del Hub**: el Hub implementa realmente **Credentials &
-> Registration**, **Locations**, **Tariffs** y **Hub Client Info**. Este
-> SDK expone un cliente completo y funcional para esos cuatro módulos, y
-> stubs tipados para el resto del roadmap OCPI (Sessions, CDRs, Tokens,
-> Commands, Invoice Reconciliation, Charging Profiles), que hoy devuelven
-> `ErrNotImplemented`.
+> **Estado actual del Hub**: el Hub implementa realmente todos los
+> módulos del roadmap OCPI 2.3.0, y este SDK expone un cliente completo
+> y funcional para cada uno de ellos.
 
 ## Instalación
 
@@ -156,26 +153,23 @@ if ocpi.AsOcpiError(err, &ocpiErr) {
 }
 ```
 
-## Módulos disponibles vs roadmap
+## Módulos disponibles
 
-| Módulo | Estado | Métodos del SDK |
-|---|---|---|
-| Credentials & Registration | **Disponible** (implementado en el Hub) | `GetVersions`, `GetDetails`, `RegisterCredentials`, `RenewCredentials`, `TerminateCredentials` |
-| Locations | **Disponible** (implementado en el Hub) | `GetLocations`, `GetLocation`, `PutLocation`, `PatchLocation` |
-| Tariffs | **Disponible** (implementado en el Hub) | `GetTariffs`, `GetTariff`, `PutTariff`, `DeleteTariff` |
-| Hub Client Info | **Disponible** (implementado en el Hub) | `ListHubClientInfo`, `GetHubClientInfo` |
-| Sessions | Roadmap | `GetActiveSession` |
-| CDRs | Roadmap | `GetCdrs`, `SubmitCdr` |
-| Tokens & Authorisation | Roadmap | `AuthorizeToken` |
-| Commands | Roadmap | `StartSession`, `StopSession`, `UnlockConnector` |
-| Invoice Reconciliation (Ed. 2) | Roadmap | `GetInvoiceReconciliations` |
-| Charging Profiles | Roadmap | `SetChargingProfile` |
+| Módulo | Métodos del SDK |
+|---|---|
+| Credentials & Registration | `GetVersions`, `GetDetails`, `RegisterCredentials`, `RenewCredentials`, `TerminateCredentials` |
+| Locations | `GetLocations`, `GetLocation`, `PutLocation`, `PatchLocation` |
+| Tariffs | `GetTariffs`, `GetTariff`, `PutTariff`, `DeleteTariff` |
+| Hub Client Info | `ListHubClientInfo`, `GetHubClientInfo` |
+| Sessions | `GetSessions`, `GetSession`, `PutSession`, `PatchSession` |
+| CDRs | `GetCdrs`, `GetCdr`, `PostCdr` |
+| Tokens & Authorisation | `GetTokens`, `GetToken`, `PutToken`, `PatchToken`, `DeleteToken`, `AuthorizeToken` |
+| Commands | `StartSession`, `ReserveNow`, `StopSession`, `UnlockConnector`, `CancelReservation`, `GetCommand` |
+| Charging Profiles | `GetActiveChargingProfile`, `SetChargingProfile`, `DeleteChargingProfile`, `GetChargingProfile` |
+| Invoice Reconciliation (Ed. 2) | `GetInvoiceReconciliations`, `GetInvoiceReconciliation`, `PutInvoiceReconciliation`, `DeleteInvoiceReconciliation` |
 
-Todos los stubs de módulos "Roadmap" ya tienen sus tipos Go completos
-(con tags `json:"..."` que reflejan el objeto OCPI real), listos para usar
-en cuanto el Hub implemente el módulo server-side. Llamarlos hoy devuelve
-`ocpi.ErrNotImplemented` (verificable con `ocpi.IsNotImplemented(err)`), con
-un mensaje que referencia el roadmap (`docs/Roaming_hub_Latam.md`).
+Consultá `docs/Roaming_hub_Latam.md` y `components/ModuleAccordion.tsx` en
+el repositorio del Hub para el detalle de cada módulo.
 
 ## Desarrollo
 

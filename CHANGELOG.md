@@ -4,6 +4,38 @@ Todas las versiones notables de `github.com/latam-evra/ocpi-go` se documentan
 en este archivo. El formato sigue aproximadamente
 [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [0.5.0] - 2026-09-23
+
+### Agregado
+
+- Implementación real del módulo **Charging Profiles**
+  (`ocpi/charging_profiles.go`): `GetActiveChargingProfile`,
+  `SetChargingProfile`, `DeleteChargingProfile`, `GetChargingProfile`.
+  Al igual que Commands, no es CRUD simétrico: un método por acción
+  (`GET_ACTIVE_CHARGING_PROFILE`/`PUT_CHARGING_PROFILE`/
+  `DELETE_CHARGING_PROFILE`) sobre una sesión existente, más
+  `GetChargingProfile` cuyo `GET` vive en
+  `/chargingprofiles/callback/{id}`, no en
+  `/chargingprofiles/{session_id}`.
+- Tests unitarios (`ocpi/charging_profiles_test.go`) y de integración
+  (build tag `integration`: `ocpi/charging_profiles_integration_test.go`,
+  con un `httptest.NewServer` actuando de CPO externo).
+- `ocpi/stubs.go` se elimina: con Charging Profiles implementado, ya no
+  queda ningún módulo en el roadmap del Hub. `ErrNotImplemented`,
+  `IsNotImplemented` y `notImplementedError` se retiran de
+  `ocpi/errors.go` por no tener ya ningún uso.
+
+### Breaking changes
+
+- `SetChargingProfile` cambia de firma: antes tomaba
+  `(ctx, sessionID, ChargingProfile)` y siempre devolvía
+  `ErrNotImplemented`; ahora toma
+  `(ctx, tokenB, countryCode, partyID, sessionID, responseURL, ChargingProfile)`
+  y devuelve `(*ChargingProfileAckResponse, error)` contra el Hub real.
+- `ChargingProfile.Limit` (un único límite) se reemplaza por
+  `ChargingProfilePeriod` (lista de `{start_period, limit}`), reflejando
+  el objeto `charging_profile` real de OCPI 2.3.0.
+
 ## [0.4.0] - 2026-09-23
 
 ### Agregado

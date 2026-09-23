@@ -1,12 +1,10 @@
 // Package ocpi implements a lightweight Go client for the LATAM EV Roaming
 // Alliance OCPI 2.3.0 Hub.
 //
-// Today the Hub only implements the Credentials & Registration module
-// server-side; every other module described in the OCPI 2.3.0 roadmap
-// (Locations, Sessions, CDRs, Tariffs, Tokens, Commands, Hub Client Info,
-// Invoice Reconciliation, Charging Profiles) is exposed here only as typed
-// stubs that return ErrNotImplemented, so that consumers can already code
-// against the final shapes.
+// The Hub implements every module in the OCPI 2.3.0 roadmap server-side:
+// Credentials & Registration, Locations, Tariffs, Hub Client Info,
+// Sessions, CDRs, Tokens & Authorisation, Commands, Invoice Reconciliation
+// and Charging Profiles.
 package ocpi
 
 import "time"
